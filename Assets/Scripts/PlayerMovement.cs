@@ -12,9 +12,11 @@ public class PlayerMovement : MonoBehaviour
 
     float playerGravity;
     Vector2 moveInput;
+
     Rigidbody2D playerRigidbody;
     Animator playerAnimator;
-    CapsuleCollider2D playerCollider;
+    CapsuleCollider2D bodyCollider;
+    BoxCollider2D feetCollider;
 
 
     void Start()
@@ -22,7 +24,8 @@ public class PlayerMovement : MonoBehaviour
         playerRigidbody = GetComponent<Rigidbody2D>();
         playerGravity = playerRigidbody.gravityScale;
         playerAnimator = GetComponent<Animator>();
-        playerCollider = GetComponent<CapsuleCollider2D>();
+        bodyCollider = GetComponent<CapsuleCollider2D>();
+        feetCollider = GetComponent<BoxCollider2D>();
     }
 
     void Update()
@@ -47,6 +50,7 @@ public class PlayerMovement : MonoBehaviour
 
     void OnJump(InputValue value)
     {
+        Debug.Log(!IsTouchingTheGround());
         if (!IsTouchingTheGround()) { return; }
 
         if (value.isPressed)
@@ -57,27 +61,27 @@ public class PlayerMovement : MonoBehaviour
 
     void ClimbLadder()
     {
+        playerAnimator.SetBool("isClimbing", IsClimbing());
+
         if (!IsTouchingALeader())
         {
             playerRigidbody.gravityScale = playerGravity;
-            playerAnimator.SetBool("isClimbing", false);
             return;
         }
-
         Vector2 playerClimb = new Vector2(moveInput.x * runSpeed, moveInput.y * climbingSpeed);
         playerRigidbody.velocity = playerClimb;
         playerRigidbody.gravityScale = 0f;
 
-        playerAnimator.SetBool("isClimbing", true);
+        
 
-        if (IsClimbing())
+        /* if (IsClimbing())
         {
             playerAnimator.StopPlayback();
         }
         else
         {
             playerAnimator.StartPlayback();
-        }
+        } */
 
     }
 
@@ -95,7 +99,7 @@ public class PlayerMovement : MonoBehaviour
         return Mathf.Abs(playerRigidbody.velocity.x) > Mathf.Epsilon;
     }
 
-    bool IsClimbing() => Mathf.Abs(playerRigidbody.velocity.y) > Mathf.Epsilon;
-    bool IsTouchingTheGround() => playerCollider.IsTouchingLayers(LayerMask.GetMask("Ground"));
-    bool IsTouchingALeader() => playerCollider.IsTouchingLayers(LayerMask.GetMask("Climbing"));
+    bool IsClimbing() => Mathf.Abs(playerRigidbody.velocity.y) > Mathf.Epsilon && IsTouchingALeader();
+    bool IsTouchingTheGround() => feetCollider.IsTouchingLayers(LayerMask.GetMask("Ground"));
+    bool IsTouchingALeader() => bodyCollider.IsTouchingLayers(LayerMask.GetMask("Climbing"));
 }
