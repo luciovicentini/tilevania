@@ -23,13 +23,14 @@ public class LevelExit : MonoBehaviour
 
     void LoadNextScene()
     {
+        FindObjectOfType<ScenePersist>().Reset();
         SceneManager.LoadScene(GetNextSceneIndex());
     }
 
     int GetNextSceneIndex()
     {
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
-        if (currentSceneIndex == 2) { return 1; }
+        if (currentSceneIndex == SceneManager.sceneCountInBuildSettings) { return 0; }
         return currentSceneIndex + 1;
     }
 }
